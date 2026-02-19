@@ -1,8 +1,8 @@
 # Variables
 CC = gcc
 CFLAGS = -Wall
-OBJ = main.o math_utils.o io_utils.o
-TARGET = program
+OBJ = test_main.o
+TARGET = test_program
 
 ifeq ($(filter debug,$(MAKECMDGOALS)),debug)
 	CFLAGS += -DDEBUG -g
@@ -14,7 +14,6 @@ debug: all
 
 # Default target
 all: $(TARGET)
-	$(MAKE) -C tests
 
 # Rule to build program
 $(TARGET): $(OBJ)
@@ -27,9 +26,6 @@ $(TARGET): $(OBJ)
 # Clean target
 clean:
 	rm -f $(OBJ) $(TARGET)
-	$(MAKE) -C tests clean
 
 # Run target (Optional)
-run:
-	./program
-	./tests/test_program
+

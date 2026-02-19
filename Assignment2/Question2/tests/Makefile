@@ -1,4 +1,5 @@
 # Variables
+CC = 
 
 # Phony targets to avoid conflicts
 
