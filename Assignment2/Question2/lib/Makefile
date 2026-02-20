@@ -13,4 +13,5 @@ math_lib.o: math_lib.c
 	$(CC) $(CFLAGS) -c math_lib.c -o math_lib.o
 
 # Clean target: Remove the object file
-clean: rm -f math_lib.o
+clean:
+	rm -f math_lib.o
