@@ -12,11 +12,16 @@ TARGET = program
 all: $(TARGET)
 
 # Rule to link the object files and create the program executable
-$(TARGET): main.o $(LIB_OBJ)
+$(TARGET): $(OBJ) $(LIB_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Rules to compile main.o and utils.o
+main.o: main.c
+	$(CC) $(CFLAGS) -c main.c -o main.o
+
+utils.o: utils.c
+	$(CC) $(CFLAGS) -c utils.c -o utils.o
 
 # Clean target: Remove the object files and the program executable
 clean:
-	rm -f main.o $(TARGET)
+	rm -f $(OBJ) $(TARGET)
