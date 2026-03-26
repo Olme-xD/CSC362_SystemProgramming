@@ -48,18 +48,21 @@ static void cmd_reg(airplane *plane, char *rest) {
         send_err(plane, "Missing plane ID");
         return;
     }
+
     if (strlen(rest) > PLANE_MAXID) {
         send_err(plane, "Plane ID too long");
         return;
     }
-    if (isalnum(*rest)) {
-        strncpy(plane->id, rest, PLANE_MAXID);
-        plane->id[PLANE_MAXID] = '\0';
-        send_ok(plane);
-    } else {
-        send_err(plane, "Plane ID must be alphanumeric");
-        return;
+
+    for (size_t i = 0; i < strlen(rest); i++) {
+        if (!isalnum(rest[i])) {
+            send_err(plane, "Plane ID must be alphanumeric");
+            return;
+        }
     }
+    strncpy(plane->id, rest, PLANE_MAXID);
+    plane->id[PLANE_MAXID] = '\0';
+    send_ok(plane);
 }
 
 /************************************************************************
@@ -69,10 +72,6 @@ static void cmd_reqtaxi(airplane *plane, char *rest) {
     // TODO for part 1: Add state check (plane must be registered)
     if (PLANE_ATTERMINAL != plane->state) {
         send_err(plane, "Plane not at terminal");
-        return;
-    }
-    if (plane->id[0] == '\0') {
-        send_err(plane, "Unregistered plane -- cannot process request");
         return;
     } else {
         send_ok(plane);
@@ -85,6 +84,72 @@ static void cmd_reqtaxi(airplane *plane, char *rest) {
 static void cmd_bye(airplane *plane, char *rest) {
     // TODO: Handle "BYE" command
     plane->state = PLANE_DONE;
+}
+
+
+/************************************************************************
+ * Handle the "REQPOS" command.
+ */
+static void cmd_reqpos(airplane *plane, char *rest) {
+    // TODO: Handle "REQPOS" command
+    if (PLANE_ATTERMINAL == plane->state) {
+        fprintf(plane->fp_send, "POS %s\n", "ATTERMINAL");
+    } else if (PLANE_TAXIING == plane->state) {
+        fprintf(plane->fp_send, "POS %s\n", "TAXIING");
+    } else if (PLANE_INAIR == plane->state) {
+        fprintf(plane->fp_send, "POS %s\n", "INAIR");
+    } else {
+        send_err(plane, "Unknown plane state");
+    }
+}
+
+/************************************************************************
+ * Handle the "REQAHEAD" command.
+ */
+static void cmd_reqahead(airplane *plane, char *rest) {
+    // TODO: Handle "REQAHEAD" command
+    for (size_t i = 0; i < strlen(rest); i++) {
+        if (!isalnum(rest[i])) {
+            send_err(plane, "Plane ID must be alphanumeric");
+            return;
+        }
+    }
+    fprintf(plane->fp_send, "AHEAD %s\n", rest);
+}
+
+/************************************************************************
+ * Handle the "INAIR" command.
+ */
+static void cmd_inair(airplane *plane, char *rest) {
+    // TODO: Handle "INAIR" command
+    if (PLANE_INAIR != plane->state) {
+        send_err(plane, "Plane not in air");
+        return;
+    } else {
+        send_ok(plane);
+    }
+}
+
+/************************************************************************
+ * Handle the "TAKEOFF" command.
+ */
+static void cmd_takeoff(airplane *plane, char *rest) {
+    //  TODO: Handle "TAKEOFF" command
+    if (PLANE_CLEAR != plane->state) {
+        send_err(plane, "Plane not cleared to fly");
+        return;
+    } else {
+        plane->state = PLANE_INAIR;
+        send_ok(plane);
+    }
+}
+
+/************************************************************************
+ * Handle the "NOTICE" command.
+ */
+static void cmd_notice(airplane *plane, char *rest) {
+    //  TODO: Handle "NOTICE" command
+    fprintf(plane->fp_send, "NOTICE %s\n", rest);
 }
 
 /************************************************************************
@@ -111,6 +176,16 @@ void docommand(airplane *plane, char *command) {
         cmd_reqtaxi(plane, args);
     } else if (strcmp(cmd, "BYE") == 0) {
         cmd_bye(plane, args);
+    } else if (strcmp(cmd, "REQPOS") == 0) {
+        cmd_reqpos(plane, args);
+    } else if (strcmp(cmd, "REQAHEAD") == 0) {
+        cmd_reqahead(plane, args);
+    } else if (strcmp(cmd, "INAIR") == 0) {
+        cmd_inair(plane, args);
+    } else  if (strcmp(cmd, "TAKEOFF") == 0) {
+        cmd_takeoff(plane, args);
+    } else if (strcmp(cmd, "NOTICE") == 0) {
+        cmd_notice(plane, args);
     } else {
         send_err(plane, "Unknown command");
     }
