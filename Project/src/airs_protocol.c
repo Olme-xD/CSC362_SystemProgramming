@@ -84,12 +84,12 @@ static void cmd_reg(airplane *plane, char *rest) {
  * Handle the "REQTAXI" command.
  */
 static void cmd_reqtaxi(airplane *plane, char *rest) {
-    if (PLANE_ATTERMINAL != plane->state) {
-        send_err(plane, "Plane not at terminal");
+    if (PLANE_UNREG == plane->state) {
+        send_err(plane, "Plane must register first");
         return;
-    } else {
-        send_ok(plane);
     }
+    
+    send_err(plane, "Command not implemented yet");
 }
 
 /************************************************************************
@@ -105,45 +105,36 @@ static void cmd_bye(airplane *plane, char *rest) {
  * Handle the "REQPOS" command.
  */
 static void cmd_reqpos(airplane *plane, char *rest) {
-    if (PLANE_ATTERMINAL == plane->state) {
-        fprintf(plane->fp_send, "POS %s\n", "ATTERMINAL");
-    } else if (PLANE_TAXIING == plane->state) {
-        fprintf(plane->fp_send, "POS %s\n", "TAXIING");
-    } else if (PLANE_INAIR == plane->state) {
-        fprintf(plane->fp_send, "POS %s\n", "INAIR");
-    } else {
-        send_err(plane, "Unknown plane state");
+    if (PLANE_UNREG == plane->state) {
+        send_err(plane, "Plane must register first");
+        return;
     }
+    
+    send_err(plane, "Command not implemented yet");
 }
 
 /************************************************************************
  * Handle the "REQAHEAD" command.
  */
 static void cmd_reqahead(airplane *plane, char *rest) {
-    if (rest == NULL) {
-        fprintf(plane->fp_send, "AHEAD\n");
+    if (PLANE_UNREG == plane->state) {
+        send_err(plane, "Plane must register first");
         return;
     }
     
-    for (size_t i = 0; i < strlen(rest); i++) {
-        if (!isalnum(rest[i])) {
-            send_err(plane, "Plane ID must be alphanumeric");
-            return;
-        }
-    }
-    fprintf(plane->fp_send, "AHEAD %s\n", rest);
+    send_err(plane, "Command not implemented yet");
 }
 
 /************************************************************************
  * Handle the "INAIR" command.
  */
 static void cmd_inair(airplane *plane, char *rest) {
-    if (PLANE_INAIR != plane->state) {
-        send_err(plane, "Plane not in air");
+    if (PLANE_UNREG == plane->state) {
+        send_err(plane, "Plane must register first");
         return;
-    } else {
-        send_ok(plane);
     }
+    
+    send_err(plane, "Command not implemented yet");
 }
 
 /************************************************************************
