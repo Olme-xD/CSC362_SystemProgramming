@@ -51,12 +51,12 @@ void *client_thread(void *arg) {
  * port and returns the file descriptor for the server socket.
  */
 int setup_server(int port) {
-    int server_fd;
+    int server_file_descriptor;
     struct sockaddr_in address;
 
     // Create socket file descriptor
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        perror("Socket failed");
+    if ((server_file_descriptor = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("Socket failed!");
         exit(EXIT_FAILURE);
     }
 
@@ -66,18 +66,18 @@ int setup_server(int port) {
     address.sin_port = htons(port);
 
     // Forcefully attaching socket to the port
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        perror("Bind failed");
+    if (bind(server_file_descriptor, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Bind failed!");
         exit(EXIT_FAILURE);
     }
 
     // Start listening for incoming connections
-    if (listen(server_fd, 10) < 0) {
-        perror("Listen failed");
+    if (listen(server_file_descriptor, 10) < 0) {
+        perror("Listen failed!");
         exit(EXIT_FAILURE);
     }
 
-    return server_fd;
+    return server_file_descriptor;
 }
 
 /************************************************************************
@@ -90,33 +90,36 @@ int main(int argc, char *argv[]) {
     init_planelist();
 
     // Abstracted server setup
-    int server_fd = setup_server(8080);
+    int server_file_descriptor = setup_server(8080);
     printf("Ground Control Server listening on port 8080...\n");
 
+    // Main loop to accept incoming client connections
     while (1) {
-        int client_fd;
-        struct sockaddr_in client_addr;
-        socklen_t addr_len = sizeof(client_addr);
+        int client_file_descriptor;
+        struct sockaddr_in client_address;
+        socklen_t address_len = sizeof(client_address);
 
-        client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
-        if (client_fd < 0) {
+        // Accept a new client connection
+        client_file_descriptor = accept(server_file_descriptor, (struct sockaddr *)&client_address, &address_len);
+        if (client_file_descriptor < 0) {
             perror("Accept failed");
             continue; 
         }
 
-        int client_fd_dup = dup(client_fd);
-        if (client_fd_dup < 0) {
-            perror("Dup failed");
-            close(client_fd);
+        //  the client file descriptor for separate reading and writing
+        int client_file_descriptor_dup = dup(client_file_descriptor);
+        if (client_file_descriptor_dup < 0) {
+            perror("Duplicate failed");
+            close(client_file_descriptor);
             continue;
         }
 
-        FILE *fp_recv = fdopen(client_fd, "r");
-        FILE *fp_send = fdopen(client_fd_dup, "w");
-
+        FILE *fp_recv = fdopen(client_file_descriptor, "r");
+        FILE *fp_send = fdopen(client_file_descriptor_dup, "w");
         setvbuf(fp_send, NULL, _IOLBF, 0);
         setvbuf(fp_recv, NULL, _IOLBF, 0);
 
+        // Create a new airplane struct for the client and start a thread to handle it
         airplane *new_plane = malloc(sizeof(airplane));
         if (new_plane == NULL) {
             perror("Memory allocation failed");
