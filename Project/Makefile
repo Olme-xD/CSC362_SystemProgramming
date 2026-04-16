@@ -22,7 +22,7 @@ PROGRAMS = gndcontrol
 # math library. It's OK to leave either or both of the LDFLAGS and LDLIBS
 # definitions out.
 
-gndcontrol_OBJS = gndcontrol.o airs_protocol.o airplane.o util.o
+gndcontrol_OBJS = gndcontrol.o airs_protocol.o airplane.o util.o alist.o planelist.o
 
 ############################################################################
 # Makefile magic below here. CSC 362 students don't need to change anything
